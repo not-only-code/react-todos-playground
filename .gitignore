@@ -2,7 +2,7 @@
 .sass-cache
 /node_modules
 /bower_components
-/dist
+/app/dist
 *.apk
 *.ap_
 *.d
