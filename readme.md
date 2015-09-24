@@ -16,6 +16,10 @@ This is a small 'todos' app playground using [ReactJS](https://facebook.github.i
 
 # Changelog
 
+### 1.2.0
+
+* Removed 'editing' state from data logic
+
 ### 1.1.0
 
 * Added functionality with hardcoded data
