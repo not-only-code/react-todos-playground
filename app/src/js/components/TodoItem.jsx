@@ -19,18 +19,15 @@ var TodoItem = React.createClass({
   },
 
   onComplete: function() {
-    this.props.onComplete(this.props.reactKey);
+    this.props.onComplete(this.props.reactKey, this.props.completed);
   },
 
   onDelete: function() {
     this.props.onDelete(this.props.reactKey);
   },
 
-  saveItem: function() {
-    var input = this.getEditInput();
-    var item = _.cloneDeep(this.props);
-    _.extend(item, {title: input.value});
-    this.props.saveItem(item);
+  saveTitle: function() {
+    this.props.saveTitle(this.props.reactKey, this.getEditInput().value);
     this.offEdit();
   },
 
@@ -38,7 +35,7 @@ var TodoItem = React.createClass({
     if (event.keyCode != this.KEY_ENTER) {
       return;
     }
-    this.saveItem();
+    this.saveTitle();
   },
 
   componentDidUpdate: function() {
@@ -62,7 +59,7 @@ var TodoItem = React.createClass({
           <label onDoubleClick={this.onEdit}>{this.props.title}</label>
           <button className="destroy" onClick={this.onDelete} ></button>
         </div>
-        <input ref="editItem" className="edit" defaultValue={this.props.title} onBlur={this.saveItem} onKeyDown={this.savePressItem}/>
+        <input ref="editItem" className="edit" defaultValue={this.props.title} onBlur={this.saveTitle} onKeyDown={this.savePressItem}/>
       </li>
     );
   }

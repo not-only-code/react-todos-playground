@@ -1,12 +1,14 @@
 var React = require('react'),
     _ = require('lodash'),
+    Firebase = require('firebase'),
+    ReactFire = require('reactfire'),
     ClassNames = require('classnames'),
     Utils = require('../Utils'),
     TodoItem = require('./TodoItem');
 
 var Todos = React.createClass({
 
-  mixins: [Utils],
+  mixins: [Utils, ReactFire],
 
   reRender: function() {
     this.forceUpdate();
@@ -16,19 +18,17 @@ var Todos = React.createClass({
     window.addEventListener("hashchange", this.reRender);
   },
 
+  componentWillMount: function() {
+    var ref = new Firebase("https://reactjs-todo.firebaseio.com/todos");
+    this.bindAsArray(ref, "items");
+  },
+
   componentWillUnmount: function() {
     window.removeEventListener("hashchange", this.reRender);
   },
 
   getInitialState: function() {
-    var TODOS = [
-      { key: 'AD56S6', title: 'Realtime data!', completed: 1},
-      { key: 'AF4F44', title: 'JavaScript is fun', completed: 0},
-      { key: 'R324FF', title: 'Coffee makes you awake', completed: 0}
-    ];
-
     return {
-      items: TODOS,
       editing: null
     }
   },
@@ -39,10 +39,10 @@ var Todos = React.createClass({
     })
   },
 
-  onComplete: function(key) {
-    var item = _.findWhere(this.state.items, {key: key});
-    item.completed = Number(!item.completed);
-    this.forceUpdate();
+  onComplete: function(key, completed) {
+    this.firebaseRefs.items.child(key).update({
+      completed: Number(!completed)
+    });
   },
 
   offEdit: function(key) {
@@ -52,20 +52,13 @@ var Todos = React.createClass({
   },
 
   onDelete: function(key) {
-    var item = _.findWhere(this.state.items, {key: key});
-    if (_.isUndefined(item)) {
-      return;
-    }
-    this.setState({
-      items: _.without(this.state.items, item)
-    });
+    this.firebaseRefs.items.child(key).remove();
   },
 
-  saveItem: function(item) {
-    _.extend(_.findWhere(this.state.items, {key: item.reactKey}), {
-      title: item.title,
+  saveTitle: function(key, title) {
+    this.firebaseRefs.items.child(key).update({
+      title: title
     });
-    this.forceUpdate();
   },
 
   getCompleted: function() {
@@ -99,15 +92,11 @@ var Todos = React.createClass({
     }
     var $newItem = this.refs.newItem.getDOMNode(),
         newItem = {
-          key: this.keyGen(),
           title: $newItem.value,
           completed: 0
         };
 
-    var items = this.state.items.concat([newItem]);
-    this.setState({
-      items: items
-    });
+    this.firebaseRefs.items.push(newItem);
     $newItem.value = '';
   },
 
@@ -134,8 +123,8 @@ var Todos = React.createClass({
 
     var todoItems = _.map(items, function(item) {
       return <TodoItem
-        key={item.key}
-        reactKey={item.key}
+        key={item['.key']}
+        reactKey={item['.key']}
         title={item.title}
         editing={this.state.editing === item.key}
         completed={item.completed}
@@ -143,7 +132,7 @@ var Todos = React.createClass({
         onComplete={this.onComplete}
         onEdit={this.onEdit}
         offEdit={this.offEdit}
-        saveItem={this.saveItem} />
+        saveTitle={this.saveTitle} />
     }, this);
 
     return (
