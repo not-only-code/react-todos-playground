@@ -31,6 +31,7 @@ var TodoItem = React.createClass({
     var item = _.cloneDeep(this.props);
     _.extend(item, {title: input.value});
     this.props.saveItem(item);
+    this.offEdit();
   },
 
   savePressItem: function(event) {
@@ -54,10 +55,8 @@ var TodoItem = React.createClass({
       classNames += ' editing'
     }
 
-    console.log(this.props.completed);
-
     return (
-      <li key={this.props.key} className={classNames}>
+      <li className={classNames}>
         <div className="view">
           <input className="toggle" type="checkbox" checked={Boolean(this.props.completed)} onChange={this.onComplete} />
           <label onDoubleClick={this.onEdit}>{this.props.title}</label>

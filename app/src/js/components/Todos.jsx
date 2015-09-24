@@ -22,20 +22,21 @@ var Todos = React.createClass({
 
   getInitialState: function() {
     var TODOS = [
-      { key: 'AD56S6', title: 'Realtime data!', completed: 1, editing: 0},
-      { key: 'AF4F44', title: 'JavaScript is fun', completed: 0, editing: 0},
-      { key: 'R324FF', title: 'Coffee makes you awake', completed: 0, editing: 0}
+      { key: 'AD56S6', title: 'Realtime data!', completed: 1},
+      { key: 'AF4F44', title: 'JavaScript is fun', completed: 0},
+      { key: 'R324FF', title: 'Coffee makes you awake', completed: 0}
     ];
 
     return {
-      items: TODOS
+      items: TODOS,
+      editing: null
     }
   },
 
   onEdit: function(key) {
-    var item = _.findWhere(this.state.items, {key: key});
-    item.editing = 1;
-    this.forceUpdate();
+    this.setState({
+      editing: key
+    })
   },
 
   onComplete: function(key) {
@@ -45,9 +46,9 @@ var Todos = React.createClass({
   },
 
   offEdit: function(key) {
-    var item = _.findWhere(this.state.items, {key: key});
-    item.editing = 0;
-    this.forceUpdate();
+    this.setState({
+      editing: null
+    })
   },
 
   onDelete: function(key) {
@@ -63,7 +64,6 @@ var Todos = React.createClass({
   saveItem: function(item) {
     _.extend(_.findWhere(this.state.items, {key: item.reactKey}), {
       title: item.title,
-      editing: 0
     });
     this.forceUpdate();
   },
@@ -137,7 +137,7 @@ var Todos = React.createClass({
         key={item.key}
         reactKey={item.key}
         title={item.title}
-        editing={item.editing}
+        editing={this.state.editing === item.key}
         completed={item.completed}
         onDelete={this.onDelete}
         onComplete={this.onComplete}
