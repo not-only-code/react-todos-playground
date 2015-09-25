@@ -27,7 +27,12 @@ var TodoItem = React.createClass({
   },
 
   saveTitle: function() {
-    this.props.saveTitle(this.props.reactKey, this.getEditInput().value);
+    var input = this.getEditInput();
+    if (_.isEmpty(input.value)) {
+      input.value = this.props.title;
+    } else {
+      this.props.saveTitle(this.props.reactKey, input.value);
+    }
     this.offEdit();
   },
 
