@@ -66,10 +66,9 @@ var Todos = React.createClass({
   },
 
   clearCompleted: function() {
-    var completed = this.getCompleted();
-    this.setState({
-      items: _.difference(this.state.items, completed)
-    });
+    this.getCompleted().forEach(function(item){
+      this.onDelete(item['.key']);
+    }, this);
   },
 
   turnAll: function() {
@@ -78,25 +77,23 @@ var Todos = React.createClass({
 
   completeAll: function() {
     var turnAll = this.refs.completeAll.getDOMNode().checked;
-    this.setState({
-      items: _.map(this.state.items, function(item){
-        item.completed = Number(turnAll);
-        return item;
-      }, this)
-    })
+    this.state.items.forEach(function(item){
+      this.onComplete(item['.key'], !turnAll)
+    }, this);
   },
 
   onSubmit: function(event) {
     if (event.keyCode != this.KEY_ENTER) {
       return;
     }
-    var $newItem = this.refs.newItem.getDOMNode(),
-        newItem = {
-          title: $newItem.value,
-          completed: 0
-        };
-
-    this.firebaseRefs.items.push(newItem);
+    var $newItem = this.refs.newItem.getDOMNode();
+    if (_.isEmpty($newItem.value)) {
+      return;
+    }
+    this.firebaseRefs.items.push({
+      title: $newItem.value,
+      completed: 0
+    });
     $newItem.value = '';
   },
 
@@ -126,7 +123,7 @@ var Todos = React.createClass({
         key={item['.key']}
         reactKey={item['.key']}
         title={item.title}
-        editing={this.state.editing === item.key}
+        editing={this.state.editing === item['.key']}
         completed={item.completed}
         onDelete={this.onDelete}
         onComplete={this.onComplete}
