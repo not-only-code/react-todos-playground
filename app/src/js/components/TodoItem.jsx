@@ -10,48 +10,32 @@ var TodoItem = React.createClass({
     return this.refs.editItem.getDOMNode();
   },
 
-  onEdit: function() {
-    this.props.onEdit(this.props.reactKey);
-  },
-
-  offEdit: function() {
-    this.props.offEdit(this.props.reactKey);
-  },
-
-  onComplete: function() {
-    this.props.onComplete(this.props.reactKey, this.props.completed);
-  },
-
-  onDelete: function() {
-    this.props.onDelete(this.props.reactKey);
-  },
-
-  saveTitle: function() {
+  saveItem: function() {
     var input = this.getEditInput();
     if (_.isEmpty(input.value)) {
       input.value = this.props.title;
     } else {
-      this.props.saveTitle(this.props.reactKey, input.value);
+      this.props.saveItem({
+        title: input.value
+      });
     }
-    this.offEdit();
+    this.props.offEdit();
   },
 
-  savePressItem: function(event) {
+  onKeyDown: function(event) {
     if (event.keyCode != this.KEY_ENTER) {
       return;
     }
-    this.saveTitle();
+    this.saveItem();
   },
 
   componentDidUpdate: function() {
-    var input = this.getEditInput();
     if (this.props.editing) {
-      input.focus();
+      this.getEditInput().focus();
     }
   },
 
   render: function() {
-
     var classNames = this.props.completed? 'completed' : '';
     if (this.props.editing) {
       classNames += ' editing'
@@ -60,11 +44,11 @@ var TodoItem = React.createClass({
     return (
       <li className={classNames}>
         <div className="view">
-          <input className="toggle" type="checkbox" checked={Boolean(this.props.completed)} onChange={this.onComplete} />
-          <label onDoubleClick={this.onEdit}>{this.props.title}</label>
-          <button className="destroy" onClick={this.onDelete} ></button>
+          <input className="toggle" type="checkbox" checked={Boolean(this.props.completed)} onChange={this.props.saveItem.bind(this, {completed: Number(!this.props.completed)})} />
+          <label onDoubleClick={this.props.onEdit}>{this.props.title}</label>
+          <button className="destroy" onClick={this.props.onDelete} ></button>
         </div>
-        <input ref="editItem" className="edit" defaultValue={this.props.title} onBlur={this.saveTitle} onKeyDown={this.savePressItem}/>
+        <input ref="editItem" className="edit" defaultValue={this.props.title} onBlur={this.saveItem} onKeyDown={this.onKeyDown}/>
       </li>
     );
   }

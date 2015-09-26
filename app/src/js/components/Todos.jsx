@@ -33,32 +33,12 @@ var Todos = React.createClass({
     }
   },
 
-  onEdit: function(key) {
-    this.setState({
-      editing: key
-    })
-  },
-
-  onComplete: function(key, completed) {
-    this.firebaseRefs.items.child(key).update({
-      completed: Number(!completed)
-    });
-  },
-
-  offEdit: function(key) {
-    this.setState({
-      editing: null
-    })
-  },
-
   onDelete: function(key) {
     this.firebaseRefs.items.child(key).remove();
   },
 
-  saveTitle: function(key, title) {
-    this.firebaseRefs.items.child(key).update({
-      title: title
-    });
+  saveItem: function(key, item) {
+    this.firebaseRefs.items.child(key).update(item);
   },
 
   getCompleted: function() {
@@ -71,14 +51,16 @@ var Todos = React.createClass({
     }, this);
   },
 
-  turnAll: function() {
+  allCompleted: function() {
     return this.getCompleted().length === this.state.items.length;
   },
 
   completeAll: function() {
-    var turnAll = this.refs.completeAll.getDOMNode().checked;
+    var allCompleted = this.refs.completeAll.getDOMNode().checked;
     this.state.items.forEach(function(item){
-      this.onComplete(item['.key'], !turnAll)
+      this.saveItem(item['.key'], {
+        completed: Number(allCompleted)
+      });
     }, this);
   },
 
@@ -116,20 +98,20 @@ var Todos = React.createClass({
     var styles = this.state.items.length? {} : {display: 'none'};
     var currState = this.getCurrentState();
     var completedStyle = this.getCompleted().length? {} : {display: 'none'};
-    var turnAll = this.turnAll();
+    var allCompleted = this.allCompleted();
 
     var todoItems = _.map(items, function(item) {
+      var key = item['.key'];
       return <TodoItem
-        key={item['.key']}
-        reactKey={item['.key']}
+        key={key}
+        reactKey={key}
         title={item.title}
-        editing={this.state.editing === item['.key']}
+        editing={this.state.editing === key}
         completed={item.completed}
-        onDelete={this.onDelete}
-        onComplete={this.onComplete}
-        onEdit={this.onEdit}
-        offEdit={this.offEdit}
-        saveTitle={this.saveTitle} />
+        onDelete={this.onDelete.bind(this, key)}
+        onEdit={this.setState.bind(this, {editing: key})}
+        offEdit={this.setState.bind(this, {editing: null})}
+        saveItem={this.saveItem.bind(this, key)} />
     }, this);
 
     return (
@@ -139,7 +121,7 @@ var Todos = React.createClass({
           <input ref="newItem" className="new-todo" placeholder="What needs to be done?" autoFocus onKeyDown={this.onSubmit} />
         </header>
         <section className="main" style={styles}>
-          <input className="toggle-all" ref="completeAll" type="checkbox" checked={turnAll} onChange={this.completeAll}/>
+          <input className="toggle-all" ref="completeAll" type="checkbox" checked={allCompleted} onChange={this.completeAll}/>
           <label htmlFor="toggle-all">Mark all as complete</label>
           <ul className="todo-list">
             { todoItems }
