@@ -16,6 +16,10 @@ This is a small 'todos' app playground using [ReactJS](https://facebook.github.i
 
 ## Changelog
 
+**2.1.0**
+
+* Tweaked bindings through components
+
 **2.0.0**
 
 * Added Firebase as ddbb platform
